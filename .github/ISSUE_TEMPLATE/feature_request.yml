@@ -1,0 +1,21 @@
+name: Feature request
+description: An idea to improve ZikOffice
+labels: ["enhancement"]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: What do you want to do that you cannot do today?
+      description: Describe the problem first, then (optionally) the solution you imagine.
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: How do you do it today, or how does another program do it?
+  - type: checkboxes
+    id: help
+    attributes:
+      label: Contributing
+      options:
+        - label: I would like to work on this myself

@@ -1,0 +1,14 @@
+[Desktop Entry]
+Categories=Office;WordProcessor;Spreadsheet;Presentation;
+GenericName=Office suite
+Keywords=office;word;excel;powerpoint;docx;xlsx;pptx;pdf;spreadsheet;presentation;document;
+Comment={{comment}}
+Exec={{exec}} %F
+StartupWMClass=zik
+Icon={{icon}}
+Name={{name}}
+Terminal=false
+Type=Application
+{{#if mime_type}}
+MimeType={{mime_type}}
+{{/if}}

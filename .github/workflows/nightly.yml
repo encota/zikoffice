@@ -1,0 +1,82 @@
+name: Nightly
+
+# Builds all the packages and publishes them in a rolling pre-release called "nightly", so the latest state of `main`
+# is always downloadable (each build replaces the previous one).
+#  - Every day at 20:00 Italian time — but only if something other than documentation changed since the last nightly.
+#  - On demand: Actions → Nightly → Run workflow (always builds).
+# GitHub schedules in UTC: Italy is UTC+1 in winter and UTC+2 in summer, so two schedules are listed and the first job
+# lets through only the one that falls at 20:00 in Rome.
+on:
+  schedule:
+    - cron: "0 18 * * *"   # 20:00 in Italy during summer time (UTC+2)
+    - cron: "0 19 * * *"   # 20:00 in Italy during winter time (UTC+1)
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: nightly
+  cancel-in-progress: false
+
+jobs:
+  gate:
+    runs-on: ubuntu-latest
+    outputs:
+      build: ${{ steps.decide.outputs.build }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - id: decide
+        env:
+          GH_TOKEN: ${{ github.token }}
+          EVENT: ${{ github.event_name }}
+        run: |
+          build=true
+          if [ "$EVENT" = "schedule" ]; then
+            hour=$(TZ=Europe/Rome date +%H)
+            if [ "$hour" != "20" ]; then
+              build=false
+              echo "Not 20:00 in Italy (hour is $hour): skipping this schedule."
+            fi
+          fi
+          if [ "$build" = true ] && [ "$EVENT" = "schedule" ]; then
+            last=$(gh api "repos/$GITHUB_REPOSITORY/git/ref/tags/nightly" --jq .object.sha 2>/dev/null || true)
+            if [ -n "$last" ] && git cat-file -e "$last" 2>/dev/null; then
+              changed=$(git diff --name-only "$last" HEAD | grep -vE '(\.md$|^docs/|^\.github/ISSUE_TEMPLATE/)' | wc -l)
+              if [ "$changed" = "0" ]; then
+                build=false
+                echo "Nothing new since the last nightly ($last): not building."
+              fi
+            fi
+          fi
+          echo "build=$build" >> "$GITHUB_OUTPUT"
+
+  packages:
+    needs: gate
+    if: ${{ needs.gate.outputs.build == 'true' }}
+    uses: ./.github/workflows/package.yml
+    permissions:
+      contents: write
+
+  publish:
+    needs: packages
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: zikoffice-linux-packages
+          path: dist-packages
+
+      - name: Replace the "nightly" pre-release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          SHA: ${{ github.sha }}
+        run: |
+          gh release delete nightly --repo "$GITHUB_REPOSITORY" --cleanup-tag --yes || true
+          gh release create nightly dist-packages/* --repo "$GITHUB_REPOSITORY" --target "$SHA" \
+            --prerelease --title "Nightly (latest main)" \
+            --notes "Automatic build of the latest commit on \`main\` (${SHA::7}). It may be unstable: for normal use download the latest release instead."

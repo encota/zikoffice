@@ -1,0 +1,229 @@
+{
+  "$schema": "https://schema.tauri.app/config/2",
+  "productName": "ZikOffice",
+  "mainBinaryName": "zik",
+  "version": "0.1.0",
+  "identifier": "app.zikoffice.desktop",
+  "build": {
+    "beforeDevCommand": "npm run dev",
+    "devUrl": "http://localhost:1420",
+    "beforeBuildCommand": "npm run build",
+    "frontendDist": "../dist"
+  },
+  "app": {
+    "windows": [
+      {
+        "title": "ZikOffice",
+        "width": 1360,
+        "height": 860,
+        "minWidth": 760,
+        "minHeight": 480,
+        "center": true
+      }
+    ],
+    "security": {
+      "csp": "default-src 'self'; script-src 'self' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; connect-src 'self' ipc: http://ipc.localhost"
+    }
+  },
+  "bundle": {
+    "active": true,
+    "targets": [
+      "deb",
+      "appimage",
+      "rpm"
+    ],
+    "category": "Productivity",
+    "shortDescription": "Fast, private office suite: documents, spreadsheets, presentations and PDF",
+    "icon": [
+      "icons/32x32.png",
+      "icons/128x128.png",
+      "icons/128x128@2x.png",
+      "icons/icon.png"
+    ],
+    "fileAssociations": [
+      {
+        "ext": [
+          "xlsx"
+        ],
+        "name": "Cartella di lavoro",
+        "description": "Cartella di lavoro Excel",
+        "role": "Editor",
+        "mimeType": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+      },
+      {
+        "ext": [
+          "xlsm"
+        ],
+        "name": "Cartella di lavoro con macro",
+        "description": "Cartella di lavoro Excel con macro (le macro non vengono eseguite)",
+        "role": "Editor",
+        "mimeType": "application/vnd.ms-excel.sheet.macroEnabled.12"
+      },
+      {
+        "ext": [
+          "xls"
+        ],
+        "name": "Cartella di lavoro Excel 97-2003",
+        "description": "Cartella di lavoro Excel 97-2003",
+        "role": "Editor",
+        "mimeType": "application/vnd.ms-excel"
+      },
+      {
+        "ext": [
+          "ods"
+        ],
+        "name": "Foglio di calcolo OpenDocument",
+        "description": "Foglio di calcolo OpenDocument",
+        "role": "Editor",
+        "mimeType": "application/vnd.oasis.opendocument.spreadsheet"
+      },
+      {
+        "ext": [
+          "csv"
+        ],
+        "name": "File CSV",
+        "description": "Valori separati da virgola o punto e virgola",
+        "role": "Editor",
+        "mimeType": "text/csv"
+      },
+      {
+        "ext": [
+          "docx"
+        ],
+        "name": "Documento",
+        "description": "Documento di Word",
+        "role": "Editor",
+        "mimeType": "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+      },
+      {
+        "ext": [
+          "pages"
+        ],
+        "name": "Documento Pages",
+        "description": "Documento di Apple Pages",
+        "role": "Viewer",
+        "mimeType": "application/vnd.apple.pages"
+      },
+      {
+        "ext": [
+          "numbers"
+        ],
+        "name": "Foglio Numbers",
+        "description": "Foglio di calcolo di Apple Numbers",
+        "role": "Viewer",
+        "mimeType": "application/vnd.apple.numbers"
+      },
+      {
+        "ext": [
+          "odt"
+        ],
+        "name": "Documento OpenDocument",
+        "description": "Documento di testo OpenDocument",
+        "role": "Editor",
+        "mimeType": "application/vnd.oasis.opendocument.text"
+      },
+      {
+        "ext": [
+          "doc"
+        ],
+        "name": "Documento di Word 97-2003",
+        "description": "Documento di Word 97-2003",
+        "role": "Editor",
+        "mimeType": "application/msword"
+      },
+      {
+        "ext": [
+          "md",
+          "markdown"
+        ],
+        "name": "Documento Markdown",
+        "description": "Documento di testo Markdown",
+        "role": "Editor",
+        "mimeType": "text/markdown"
+      },
+      {
+        "ext": [
+          "rtf"
+        ],
+        "name": "Documento RTF",
+        "description": "Documento Rich Text Format",
+        "role": "Editor",
+        "mimeType": "application/rtf"
+      },
+      {
+        "ext": [
+          "pdf"
+        ],
+        "name": "Documento PDF",
+        "description": "Documento PDF (importazione testo per modifica)",
+        "role": "Editor",
+        "mimeType": "application/pdf"
+      },
+      {
+        "ext": [
+          "pptx"
+        ],
+        "name": "Presentazione",
+        "description": "Presentazione di PowerPoint",
+        "role": "Editor",
+        "mimeType": "application/vnd.openxmlformats-officedocument.presentationml.presentation"
+      },
+      {
+        "ext": [
+          "ppsx"
+        ],
+        "name": "Presentazione PowerPoint (solo visione)",
+        "description": "Presentazione di PowerPoint da mostrare",
+        "role": "Editor",
+        "mimeType": "application/vnd.openxmlformats-officedocument.presentationml.slideshow"
+      },
+      {
+        "ext": [
+          "ppt"
+        ],
+        "name": "Presentazione PowerPoint 97-2003",
+        "description": "Presentazione di PowerPoint 97-2003 (serve LibreOffice)",
+        "role": "Viewer",
+        "mimeType": "application/vnd.ms-powerpoint"
+      },
+      {
+        "ext": [
+          "odp"
+        ],
+        "name": "Presentazione OpenDocument",
+        "description": "Presentazione OpenDocument (serve LibreOffice)",
+        "role": "Viewer",
+        "mimeType": "application/vnd.oasis.opendocument.presentation"
+      }
+    ],
+    "linux": {
+      "deb": {
+        "desktopTemplate": "zikoffice.desktop",
+        "recommends": [
+          "hunspell-en-us",
+          "hunspell-it",
+          "hunspell-es",
+          "hunspell-fr",
+          "hunspell-de-de",
+          "hunspell-pt-br",
+          "fonts-crosextra-carlito",
+          "fonts-crosextra-caladea",
+          "fonts-liberation",
+          "mupdf-tools",
+          "tesseract-ocr",
+          "tesseract-ocr-eng",
+          "tesseract-ocr-ita"
+        ],
+        "depends": [
+          "poppler-utils"
+        ],
+        "postInstallScript": "deb/postinst.sh"
+      }
+    },
+    "longDescription": "ZikOffice is a small, quick office suite for Linux. It opens and edits Word, Excel and PowerPoint files (.docx, .xlsx, .pptx), OpenDocument, Apple Pages and Numbers, Markdown and PDF, in one window, with everything kept on your computer.",
+    "publisher": "The ZikOffice contributors",
+    "copyright": "Copyright (c) 2026 The ZikOffice contributors",
+    "license": "MIT OR Apache-2.0",
+    "homepage": "https://github.com/encota/zikoffice"
+  }
+}

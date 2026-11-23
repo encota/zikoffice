@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Question or idea (discussion)
+    url: https://github.com/encota/zikoffice/discussions
+    about: Ask how to do something or talk about ideas before opening an issue.
+  - name: Security problem
+    url: https://github.com/encota/zikoffice/security/advisories/new
+    about: Please report vulnerabilities privately, not as a public issue.

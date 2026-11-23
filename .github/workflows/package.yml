@@ -1,0 +1,86 @@
+name: Packages
+
+# Builds the Linux packages: .deb (Debian/Ubuntu), AppImage (any distribution) and .rpm (Fedora/openSUSE).
+#  - Run by hand (Actions → Packages → Run workflow) to get the files as downloadable artifacts, without a release.
+#  - Called by release.yml with a tag: the files are also attached to that GitHub release.
+# Built on Ubuntu 22.04 on purpose: an AppImage runs on distributions that have at least the same glibc.
+on:
+  workflow_dispatch:
+  workflow_call:
+    inputs:
+      tag:
+        description: "Release tag to attach the packages to (empty = artifacts only)"
+        type: string
+        required: false
+        default: ""
+
+permissions:
+  contents: read
+
+env:
+  CARGO_TERM_COLOR: always
+  # linuxdeploy (used by Tauri for AppImage) cannot run FUSE in CI, and its strip step fails on new toolchains.
+  APPIMAGE_EXTRACT_AND_RUN: "1"
+  NO_STRIP: "true"
+
+jobs:
+  bundle:
+    runs-on: ubuntu-22.04
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.tag || github.ref }}
+
+      - name: System libraries
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            build-essential pkg-config libwebkit2gtk-4.1-dev libgtk-3-dev libsoup-3.0-dev \
+            libjavascriptcoregtk-4.1-dev libssl-dev librsvg2-dev libxdo-dev libayatana-appindicator3-dev patchelf \
+            libfuse2 file rpm poppler-utils
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: app/package-lock.json
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+
+      - name: Build .deb and AppImage
+        working-directory: app
+        run: |
+          npm ci
+          npm run tauri build -- --bundles deb,appimage
+
+      - name: Build .rpm (best effort)
+        continue-on-error: true
+        working-directory: app
+        run: npm run tauri build -- --bundles rpm
+
+      - name: Collect packages and checksums
+        run: |
+          mkdir -p dist-packages
+          cp target/release/bundle/deb/*.deb target/release/bundle/appimage/*.AppImage dist-packages/
+          cp target/release/bundle/rpm/*.rpm dist-packages/ 2>/dev/null || echo "no rpm produced"
+          cd dist-packages
+          # Same files again under names WITHOUT the version, so that
+          # https://github.com/<owner>/<repo>/releases/latest/download/<name> always points to the newest release.
+          for f in *.deb;      do cp "$f" ZikOffice-amd64.deb; done
+          for f in *.AppImage; do cp "$f" ZikOffice-x86_64.AppImage; done
+          for f in *.rpm;      do [ -e "$f" ] && cp "$f" ZikOffice-x86_64.rpm; done 2>/dev/null || true
+          sha256sum * > SHA256SUMS.txt
+          ls -la
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: zikoffice-linux-packages
+          path: dist-packages/*
+
+      - name: Attach to the release
+        if: ${{ inputs.tag != '' }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release upload "${{ inputs.tag }}" dist-packages/* --clobber

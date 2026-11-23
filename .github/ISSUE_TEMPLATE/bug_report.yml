@@ -1,0 +1,54 @@
+name: Bug report
+description: Something does not work, or a file opens/saves badly
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for reporting! **A sample file is the most useful thing you can give us.** Please do not attach files with personal data or secrets (make a copy and remove the sensitive content).
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened?
+      description: What you did, what you expected, what you got. Screenshots (original program vs ZikOffice) help a lot.
+    validations:
+      required: true
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      options: [Documents, Spreadsheets, Presentations, PDF, Markdown, Apple Pages/Numbers, Installation / file associations, Translations, Other]
+    validations:
+      required: true
+  - type: dropdown
+    id: compat
+    attributes:
+      label: Is it a file-compatibility problem (looks different from the original program)?
+      options: ["No", "Yes — I will attach the file", "Yes — I cannot share the file"]
+    validations:
+      required: true
+  - type: textarea
+    id: file
+    attributes:
+      label: Sample file
+      description: Drag the file here (zip it if GitHub does not accept the extension). Say which program made it and its version.
+  - type: input
+    id: version
+    attributes:
+      label: ZikOffice version
+      description: "For the .deb: `dpkg -s zik-office | grep Version`"
+    validations:
+      required: true
+  - type: input
+    id: os
+    attributes:
+      label: Operating system
+      placeholder: Ubuntu 24.04, Fedora 41 …
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: Output from the terminal (optional)
+      description: Start the program with `zik` in a terminal and paste any messages.
+      render: shell

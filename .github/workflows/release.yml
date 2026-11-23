@@ -1,0 +1,41 @@
+name: Release
+
+# Automatic versioning with release-please:
+#   1. Commits to `main` follow Conventional Commits (feat: / fix: / feat!: …).
+#   2. This workflow keeps an open "release PR" that bumps the version in package.json, tauri.conf.json and
+#      Cargo.toml and updates CHANGELOG.md. The version is derived from the commits (0.x: feat → minor, fix → patch).
+#   3. Merging that PR creates the tag (vX.Y.Z) and the GitHub release, and the packages are built and attached to it.
+# Nobody edits version numbers by hand.
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+jobs:
+  release-please:
+    runs-on: ubuntu-latest
+    outputs:
+      release_created: ${{ steps.rp.outputs.release_created }}
+      tag_name: ${{ steps.rp.outputs.tag_name }}
+    steps:
+      - id: rp
+        uses: googleapis/release-please-action@v4
+        with:
+          config-file: release-please-config.json
+          manifest-file: .release-please-manifest.json
+
+  packages:
+    needs: release-please
+    if: ${{ needs.release-please.outputs.release_created == 'true' }}
+    uses: ./.github/workflows/package.yml
+    with:
+      tag: ${{ needs.release-please.outputs.tag_name }}
+    permissions:
+      contents: write

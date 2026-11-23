@@ -1,0 +1,18 @@
+name: PR title
+
+# Squash-merged pull requests become one commit with the PR title, and the version number is computed from
+# those commits, so the title must follow Conventional Commits: "fix: …", "feat: …", "docs: …", "feat!: …" (breaking).
+on:
+  pull_request_target:
+    types: [opened, edited, synchronize, reopened]
+
+permissions:
+  pull-requests: read
+
+jobs:
+  title:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: amannn/action-semantic-pull-request@v5
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

@@ -1,0 +1,44 @@
+[package]
+name = "zikoffice"
+description = "ZikOffice — a fast, private office suite: documents, spreadsheets, presentations and PDF"
+readme = "../../README.md"
+keywords = ["office", "docx", "xlsx", "pptx", "pdf"]
+version.workspace = true
+repository.workspace = true
+authors.workspace = true
+rust-version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[lib]
+# Il nome della libreria serve anche per le build mobili (Android/iOS).
+name = "zikoffice_lib"
+crate-type = ["staticlib", "cdylib", "rlib"]
+
+[build-dependencies]
+tauri-build = { version = "2.7", features = [] }
+
+[dependencies]
+calamine = "0.38"
+csv = "1"
+ironcalc = "=0.9.1"
+lopdf = "0.42.0"
+office-crypto = "0.4.0"
+pdf-extract = "0.12.1"
+zip = { version = "9.8", default-features = false, features = ["deflate"] }
+serde = { version = "1.0.229", features = ["derive"] }
+serde_json = "1"
+spellbook = "0.4.2"
+tauri = { version = "2.12", features = [] }
+tauri-plugin-dialog = "2"
+tauri-plugin-single-instance = "2"
+portable-pty = "0.9.0"
+
+[dev-dependencies]
+serde_json = "1.0.154"
+tauri = { version = "2.12", features = ["test"] }
+
+# Esportazione PDF tramite il motore di stampa di WebKitGTK (stesse versioni usate da Tauri).
+[target.'cfg(target_os = "linux")'.dependencies]
+webkit2gtk = "=2.0.2"
+gtk = "0.18"
