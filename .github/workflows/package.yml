@@ -74,7 +74,7 @@ jobs:
           sha256sum * > SHA256SUMS.txt
           ls -la
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: zikoffice-linux-packages
           path: dist-packages/*
