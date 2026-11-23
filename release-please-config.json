@@ -9,10 +9,24 @@
       "bump-minor-pre-major": true,
       "bump-patch-for-minor-pre-major": false,
       "extra-files": [
-        { "type": "json", "path": "app/package.json", "jsonpath": "$.version" },
-        { "type": "json", "path": "app/src-tauri/tauri.conf.json", "jsonpath": "$.version" },
-        { "type": "toml", "path": "Cargo.toml", "jsonpath": "$.workspace.package.version" }
-      ]
+        {
+          "type": "json",
+          "path": "app/package.json",
+          "jsonpath": "$.version"
+        },
+        {
+          "type": "json",
+          "path": "app/src-tauri/tauri.conf.json",
+          "jsonpath": "$.version"
+        },
+        {
+          "type": "toml",
+          "path": "Cargo.toml",
+          "jsonpath": "$.workspace.package.version"
+        }
+      ],
+      "include-component-in-tag": false,
+      "release-as": "0.1.0"
     }
   }
 }
