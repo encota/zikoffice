@@ -15,6 +15,7 @@
   <a href="https://github.com/encota/zikoffice/releases/latest"><img alt="Latest release" src="https://img.shields.io/github/v/release/encota/zikoffice?label=release"></a>
   <img alt="Status: early alpha" src="https://img.shields.io/badge/status-early%20alpha-orange">
   <img alt="Platform: Linux" src="https://img.shields.io/badge/platform-Linux-lightgrey">
+  <a href="https://alternativeto.net/software/zikoffice/"><img alt="ZikOffice on AlternativeTo" src="https://img.shields.io/badge/AlternativeTo-listed-1b9cf0"></a>
 </p>
 
 <p align="center">
