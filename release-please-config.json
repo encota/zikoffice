@@ -25,8 +25,7 @@
           "jsonpath": "$.workspace.package.version"
         }
       ],
-      "include-component-in-tag": false,
-      "release-as": "0.1.0"
+      "include-component-in-tag": false
     }
   }
 }
