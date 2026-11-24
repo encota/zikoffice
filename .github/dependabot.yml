@@ -1,11 +1,23 @@
 version: 2
 updates:
+  # One grouped pull request per month and per ecosystem, instead of one per package.
+  # Major versions of GitHub Actions are not proposed automatically: they can change how a workflow behaves,
+  # and some must be upgraded together (upload-artifact / download-artifact). Review them by hand.
   - package-ecosystem: npm
     directory: /app
     schedule: { interval: monthly }
+    groups:
+      npm-minor-and-patch:
+        update-types: [minor, patch]
   - package-ecosystem: cargo
     directory: /
     schedule: { interval: monthly }
+    groups:
+      cargo-minor-and-patch:
+        update-types: [minor, patch]
   - package-ecosystem: github-actions
     directory: /
     schedule: { interval: monthly }
+    ignore:
+      - dependency-name: "*"
+        update-types: ["version-update:semver-major"]
