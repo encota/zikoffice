@@ -27,7 +27,7 @@
 </p>
 
 <p align="center">
-  <img src="docs/images/documents.png" alt="Document editor" width="880">
+  <img src="docs/images/demo.gif" alt="Demo: a presentation in ZikOffice — typing a title and a list, adding pictures that arrange themselves, switching themes" width="880">
 </p>
 
 ## Why ZikOffice?
@@ -67,6 +67,7 @@ installing four different programs.
 <summary>More screenshots</summary>
 
 <p align="center">
+  <img src="docs/images/documents.png" alt="Document editor" width="430">
   <img src="docs/images/command-palette.png" alt="Command palette (Alt+Q)" width="430">
   <img src="docs/images/presentation-themes.png" alt="Presentation themes" width="430">
   <img src="docs/images/start.png" alt="Start screen with templates" width="430">

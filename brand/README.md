@@ -8,6 +8,7 @@ artwork is uncertain in many countries, so the name and logo are protected by th
 | `zikoffice_logo.jpeg` | Original logo (square, with text) |
 | `zikoffice-icon.png` | Full logo, 1024 px, transparent corners — used for the large application icons |
 | `zikoffice-mark.png` | The "Z" alone on a dark background — used for small icons (16–71 px), the window corner and the favicon |
+| `zikoffice-social-preview.png` | 1280×640 image for GitHub's *Social preview* (repository Settings) and for sharing the link |
 | `zikoffice-mark-256.png` | The "Z" alone, 256 px — used by the example presentation |
 
 **Use of the name and logo.** The source code is licensed under MIT OR Apache-2.0 (see the top-level `LICENSE-*` files).
