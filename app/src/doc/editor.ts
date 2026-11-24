@@ -54,7 +54,7 @@ export class DocEditor implements DocumentView {
   private composing = false;
   private dragging: false | "select" | "word" = false;
   /** Ridimensionamento di un'immagine con la maniglia in basso a destra. */
-  private imageDrag: { pid: number; off: number; x0: number; w0: number; ratio: number; w: number } | null = null;
+  private imageDrag: { pid: number; off: number; x0: number; y0: number; w0: number; h0: number; hx: number; hy: number; ratio: number; w: number; h: number } | null = null;
   private images = new Map<string, HTMLImageElement>();
   private wordsCache: { rev: number; words: number } = { rev: -1, words: 0 };
   private rev = 0;
@@ -312,9 +312,11 @@ export class DocEditor implements DocumentView {
       }
       // Maniglia dell'immagine selezionata, oppure clic su un'immagine.
       const selImg = this.selectedImage();
-      if (selImg && this.onImageHandle(selImg, x, y)) {
+      const handle = selImg ? this.onImageHandle(selImg, x, y) : null;
+      if (selImg && handle) {
         s.setPointerCapture(e.pointerId);
-        this.imageDrag = { pid: selImg.pid, off: selImg.off, x0: x, w0: selImg.run.width, ratio: selImg.run.width / selImg.run.height, w: selImg.run.width };
+        const { width: w0, height: h0 } = selImg.run;
+        this.imageDrag = { pid: selImg.pid, off: selImg.off, x0: x, y0: y, w0, h0, hx: handle.hx, hy: handle.hy, ratio: w0 / h0, w: w0, h: h0 };
         return;
       }
       const img = this.imageAt(x, y);
@@ -351,12 +353,25 @@ export class DocEditor implements DocumentView {
       if (this.imageDrag) {
         const pg = this.doc.page;
         const maxW = pg.width - pg.marginLeft - pg.marginRight;
-        this.imageDrag.w = Math.max(12, Math.min(maxW, this.imageDrag.w0 + (x - this.imageDrag.x0) / this.scale));
+        const d = this.imageDrag;
+        const dw = d.hx * (x - d.x0) / this.scale;
+        const dh = d.hy * (y - d.y0) / this.scale;
+        if (d.hx && d.hy && !e.shiftKey) {
+          // Angolo: le proporzioni restano quelle dell'immagine (Maiusc = libero).
+          const k = Math.abs(dw / d.w0) >= Math.abs(dh / d.h0) ? (d.w0 + dw) / d.w0 : (d.h0 + dh) / d.h0;
+          d.w = Math.max(12, Math.min(maxW, d.w0 * k));
+          d.h = d.w / d.ratio;
+        } else {
+          // Lato (o angolo con Maiusc): cambia solo la larghezza e/o l'altezza.
+          d.w = d.hx ? Math.max(12, Math.min(maxW, d.w0 + dw)) : d.w0;
+          d.h = d.hy ? Math.max(12, Math.min(2000, d.h0 + dh)) : d.h0;
+        }
         this.draw();
         return;
       }
       const selImg = this.selectedImage();
-      if (selImg && this.onImageHandle(selImg, x, y)) { s.style.cursor = "nwse-resize"; return; }
+      const hd = selImg ? this.onImageHandle(selImg, x, y) : null;
+      if (hd) { s.style.cursor = !hd.hy ? "ew-resize" : !hd.hx ? "ns-resize" : hd.hx === hd.hy ? "nwse-resize" : "nesw-resize"; return; }
       const hit = this.hitTest(x, y);
       s.style.cursor = this.imageAt(x, y) ? "default" : "text";
       if (!this.dragging || !hit) return;
@@ -374,10 +389,10 @@ export class DocEditor implements DocumentView {
       const drag = this.imageDrag;
       if (drag) {
         this.imageDrag = null;
-        if (Math.abs(drag.w - drag.w0) > 0.5) {
+        if (Math.abs(drag.w - drag.w0) > 0.5 || Math.abs(drag.h - drag.h0) > 0.5) {
           this.edit("image", () => {
             const run = this.imageRun(drag.pid, drag.off);
-            if (run) { run.width = drag.w; run.height = drag.w / drag.ratio; }
+            if (run) { run.width = drag.w; run.height = drag.h; }
           });
         } else this.draw();
         return;
@@ -469,8 +484,16 @@ export class DocEditor implements DocumentView {
     return null;
   }
 
-  private onImageHandle(img: { rect: { x: number; y: number; w: number; h: number } }, x: number, y: number): boolean {
-    return Math.abs(x - (img.rect.x + img.rect.w)) <= 7 && Math.abs(y - (img.rect.y + img.rect.h)) <= 7;
+  /** Maniglia sotto il puntatore: hx/hy valgono -1 (sinistra/alto), 0 (centro) o 1 (destra/basso). */
+  private onImageHandle(img: { rect: { x: number; y: number; w: number; h: number } }, x: number, y: number): { hx: number; hy: number } | null {
+    const { x: rx, y: ry, w, h } = img.rect;
+    for (const hy of [1, -1, 0]) {
+      for (const hx of [1, -1, 0]) {
+        if (!hx && !hy) continue;
+        if (Math.abs(x - (rx + (hx < 0 ? 0 : hx > 0 ? w : w / 2))) <= 7 && Math.abs(y - (ry + (hy < 0 ? 0 : hy > 0 ? h : h / 2))) <= 7) return { hx, hy };
+      }
+    }
+    return null;
   }
 
   private inSelection(pos: Pos): boolean {
@@ -959,18 +982,21 @@ export class DocEditor implements DocumentView {
     const img = this.selectedImage();
     if (img) {
       const w = this.imageDrag ? this.imageDrag.w * this.scale : img.rect.w;
-      const hh = this.imageDrag ? (this.imageDrag.w / this.imageDrag.ratio) * this.scale : img.rect.h;
-      const y0 = img.rect.y + img.rect.h - hh; // l'immagine poggia sulla linea di base
+      const hh = this.imageDrag ? this.imageDrag.h * this.scale : img.rect.h;
+      const dr = this.imageDrag;
+      // Anteprima: il lato opposto alla maniglia trascinata resta fermo.
+      const y0 = dr && dr.hy > 0 ? img.rect.y : img.rect.y + img.rect.h - hh; // altrimenti poggia sulla linea di base
+      const x0 = dr && dr.hx < 0 ? img.rect.x + img.rect.w - w : img.rect.x;
       ctx.save();
       ctx.strokeStyle = accent;
       ctx.lineWidth = 1.5;
       if (this.imageDrag) ctx.setLineDash([5, 3]);
-      ctx.strokeRect(img.rect.x + 0.5, y0 + 0.5, w, hh);
+      ctx.strokeRect(x0 + 0.5, y0 + 0.5, w, hh);
       ctx.setLineDash([]);
       ctx.fillStyle = "#fff";
       for (const [hx, hy] of [[0, 0], [w, 0], [0, hh], [w, hh], [w / 2, 0], [w / 2, hh], [0, hh / 2], [w, hh / 2]]) {
         ctx.beginPath();
-        ctx.arc(img.rect.x + hx + 0.5, y0 + hy + 0.5, hx === w && hy === hh ? 5 : 3.5, 0, Math.PI * 2);
+        ctx.arc(x0 + hx + 0.5, y0 + hy + 0.5, hx === w && hy === hh ? 5 : 3.5, 0, Math.PI * 2);
         ctx.fill();
         ctx.stroke();
       }
